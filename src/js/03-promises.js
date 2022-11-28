@@ -1,54 +1,48 @@
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import Notiflix from 'notiflix';
+Notiflix.Notify.init({});
 
 const refs = {
   form: document.querySelector('.form'),
+  delay: document.querySelector('input[name="delay"]'),
+  step: document.querySelector('input[name="step"]'),
+  amount: document.querySelector('input[name="amount"]'),
 };
 
-refs.form.addEventListener('submit', onFormSubmit);
+refs.form.addEventListener('submit', handleSubmit);
 
-function onFormSubmit(e) {
+function handleSubmit(e) {
   e.preventDefault();
 
-  const {
-    delay: { value: delayValue },
-    step: { value: stepValue },
-    amount: { value: amountValue }
-  } = e.currentTarget.elements;
-
-  for (let i = 1; i <= amountValue; i += 1) {
-    const currentDelay = Number(delayValue) + i * stepValue;
-    createPromise(i, currentDelay)
-      .then(({ position, delay }) => notifySuccess(position, delay))
-      .catch(({ position, delay }) => notifyFailure(position, delay));
+  for (let i = 0; i < Number(refs.amount.value); i += 1) {
+    let position = i + 1;
+    let delay = Number(refs.delay.value) + Number(refs.step.value) * i;
+    createPromise(position, delay)
+      .then(result => {
+        result;
+      })
+      .catch(result => {
+        result;
+      });
   }
 }
 
 function createPromise(position, delay) {
-  const shouldResolve = Math.random() > 0.3;
   return new Promise((resolve, reject) => {
-    if (shouldResolve) {
-      setTimeout(resolve, delay, { position, delay });
-    } else {
-      setTimeout(reject, delay, { position, delay });
-    }
-  });
-
-}
-
-function notifyFailure(position, delay) {
-  Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`, {
-    timeout: 4000,
-    clickToClose: true,
-    pauseOnHover: false,
-    showOnlyTheLastOne: false,
-  });
-}
-
-function notifySuccess(position, delay) {
-  Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`, {
-    timeout: 4000,
-    clickToClose: true,
-    pauseOnHover: false,
-    showOnlyTheLastOne: false,
+    const shouldResolve = Math.random() > 0.3;
+    setTimeout(() => {
+      if (shouldResolve) {
+        resolve(
+          Notiflix.Notify.success(
+            `✅ Fulfilled promise ${position} in ${delay}ms`
+          )
+        );
+      } else {
+        reject(
+          Notiflix.Notify.failure(
+            `❌ Rejected promise ${position} in ${delay}ms`
+          )
+        );
+      }
+    }, delay);
   });
 }
